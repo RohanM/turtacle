@@ -27,6 +27,7 @@ void setup() {
 }
 
 int left, right, go, forward, speed;
+int direction, power;
 
 void loop() {
   left = digitalRead(PIN_LEFT);
@@ -52,6 +53,20 @@ void loop() {
     ST.motor(MOTOR_STEER, 0);
   }
 
+  // Drive
+  if (go) {
+    direction = forward ? 1 : -1;
+    power = speed / 1024.0 * 128.0;
+    /*
+    Serial.print(direction); Serial.print(", ");
+    Serial.print(power); Serial.print(", ");
+    Serial.print(direction * power); Serial.println();
+    */
+    ST.motor(MOTOR_DRIVE, direction * power);
+
+  } else {
+    ST.motor(MOTOR_DRIVE, 0);
+  }
 
   delay(50);
 }
