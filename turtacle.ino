@@ -1,28 +1,57 @@
 #include <SoftwareSerial.h>
 #include <SabertoothSimplified.h>
 
-SoftwareSerial SWSerial(NOT_A_PIN, 12); // RX on no pin (unused), TX on pin 11 (to S1).
+const int PIN_GO = 2;
+const int PIN_FORWARD = 3;
+const int PIN_LEFT = 4;
+const int PIN_RIGHT = 5;
+const int PIN_SPEED = A0;
+const int PIN_MOTOR_CONTROLLER = 12;
+
+const int MOTOR_STEER = 1;
+const int MOTOR_DRIVE = 2;
+
+SoftwareSerial SWSerial(NOT_A_PIN, PIN_MOTOR_CONTROLLER); // RX on no pin (unused), TX on pin 11 (to S1).
 SabertoothSimplified ST(SWSerial); // Use SWSerial as the serial port.
 
 
 void setup() {
+  pinMode(PIN_LEFT, INPUT);
+  pinMode(PIN_RIGHT, INPUT);
+  pinMode(PIN_GO, INPUT);
+  pinMode(PIN_FORWARD, INPUT);
+
   SWSerial.begin(9600);
+
+  Serial.begin(9600);
 }
 
+int left, right, go, forward, speed;
+
 void loop() {
-  int power;
-  
-  // Ramp from -127 to 127 (full reverse to full forward), waiting 20 ms (1/50th of a second) per value.
-  for (power = -127; power <= 127; power ++)
-  {
-    ST.motor(2, power);
-    delay(20);
+  left = digitalRead(PIN_LEFT);
+  right = digitalRead(PIN_RIGHT);
+  go = digitalRead(PIN_GO);
+  forward = digitalRead(PIN_FORWARD);
+  speed = analogRead(PIN_SPEED);
+
+  /*
+  Serial.print(left); Serial.print(", ");
+  Serial.print(right); Serial.print(", ");
+  Serial.print(go); Serial.print(", ");
+  Serial.print(forward); Serial.print(", ");
+  Serial.print(speed); Serial.println("");
+  */
+
+  // Steering
+  if (left) {
+    ST.motor(MOTOR_STEER, 127);
+  } else if (right) {
+    ST.motor(MOTOR_STEER, -127);
+  } else {
+    ST.motor(MOTOR_STEER, 0);
   }
-  
-  // Now go back the way we came.
-  for (power = 127; power >= -127; power --)
-  {
-    ST.motor(2, power);
-    delay(20);
-  }
+
+
+  delay(50);
 }
