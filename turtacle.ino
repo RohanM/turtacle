@@ -11,12 +11,14 @@ const int PIN_MOTOR_CONTROLLER = 12;
 const int MOTOR_STEER = 1;
 const int MOTOR_DRIVE = 2;
 
+const int MAX_DRIVE_DELTA = 5;
+
 SoftwareSerial SWSerial(NOT_A_PIN, PIN_MOTOR_CONTROLLER); // RX on no pin (unused), TX on pin 11 (to S1).
 SabertoothSimplified ST(SWSerial); // Use SWSerial as the serial port.
 
 int left, right, go, forward, speed;
 int direction, power;
-int currentDrive, targetDrive;
+int currentDrive, targetDrive, difference;
 
 
 void setup() {
@@ -61,10 +63,8 @@ void loop() {
     power = speed / 1024.0 * 128.0;
     targetDrive = direction * power;
 
-    // TODO: Extract scale factor
-    // TODO: Adjust for asymptote
-    currentDrive = (currentDrive * 0.95) + (targetDrive * 0.05);
-
+    difference = targetDrive - currentDrive;
+    currentDrive += constrain(difference, -MAX_DRIVE_DELTA, MAX_DRIVE_DELTA);
 
     /*
     Serial.print(direction); Serial.print(", ");
