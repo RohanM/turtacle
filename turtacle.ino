@@ -55,7 +55,7 @@ void loop() {
 
   // Drive
   if (go) {
-    direction = forward ? 1 : -1;
+    direction = forward ? -1 : 1;
     power = speed / 1024.0 * 128.0;
     /*
     Serial.print(direction); Serial.print(", ");
