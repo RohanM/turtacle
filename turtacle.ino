@@ -14,6 +14,10 @@ const int MOTOR_DRIVE = 2;
 SoftwareSerial SWSerial(NOT_A_PIN, PIN_MOTOR_CONTROLLER); // RX on no pin (unused), TX on pin 11 (to S1).
 SabertoothSimplified ST(SWSerial); // Use SWSerial as the serial port.
 
+int left, right, go, forward, speed;
+int direction, power;
+int currentDrive, targetDrive;
+
 
 void setup() {
   pinMode(PIN_LEFT, INPUT);
@@ -22,12 +26,10 @@ void setup() {
   pinMode(PIN_FORWARD, INPUT);
 
   SWSerial.begin(9600);
-
   Serial.begin(9600);
-}
 
-int left, right, go, forward, speed;
-int direction, power;
+  currentDrive = 0;
+}
 
 void loop() {
   left = digitalRead(PIN_LEFT);
@@ -57,16 +59,29 @@ void loop() {
   if (go) {
     direction = forward ? -1 : 1;
     power = speed / 1024.0 * 128.0;
+    targetDrive = direction * power;
+
+    // TODO: Extract scale factor
+    // TODO: Adjust for asymptote
+    currentDrive = (currentDrive * 0.95) + (targetDrive * 0.05);
+
+
     /*
     Serial.print(direction); Serial.print(", ");
     Serial.print(power); Serial.print(", ");
     Serial.print(direction * power); Serial.println();
     */
-    ST.motor(MOTOR_DRIVE, direction * power);
 
   } else {
-    ST.motor(MOTOR_DRIVE, 0);
+    // Hard stop
+    currentDrive = 0;
   }
+
+  Serial.print(currentDrive);
+  Serial.print(" (");
+  Serial.print(targetDrive);
+  Serial.println(")");
+  ST.motor(MOTOR_DRIVE, currentDrive);
 
   delay(50);
 }
